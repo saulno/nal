@@ -1,9 +1,9 @@
-use std::sync::atomic::{AtomicUsize, Ordering};
 use chrono::NaiveDateTime;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use crate::models::grammar::query::OptionalTerm;
 
-use super::grammar::{statement::Statement, query::Query};
+use super::grammar::{query::Query, statement::Statement};
 
 static OBJECT_COUNTER: AtomicUsize = AtomicUsize::new(1);
 
@@ -46,40 +46,61 @@ impl ExperienceBase {
         self.experiences.retain(|experience| experience.id != id);
     }
 
-    pub fn list(&self) {
-        for experience in &self.experiences {
-            println!("  {}: {} {} {}", experience.id, experience.stmt.left.word, &experience.stmt.copula.to_string(), experience.stmt.right.word);
-        }
+    pub fn to_string(&self) -> String {
+        self
+            .experiences
+            .iter()
+            .map(|experience| format!("{}: {}", experience.id, experience.stmt.to_string()))
+            .collect::<Vec<String>>()
+            .join("\n")
     }
 
     pub fn query(&self, q: Query) {
         for experience in &self.experiences {
             match &q.left {
-                OptionalTerm::Question => {
-                    match &q.right {
-                        OptionalTerm::Question => {
-                            println!("  Invalid Query");
+                OptionalTerm::Question => match &q.right {
+                    OptionalTerm::Question => {
+                        println!("  Invalid Query");
+                        return;
+                    }
+                    OptionalTerm::Term(right) => {
+                        if experience.stmt.right.word == right.word {
+                            println!(
+                                "  {}: {} {} {}",
+                                experience.id,
+                                experience.stmt.left.word,
+                                &experience.stmt.copula.to_string(),
+                                experience.stmt.right.word
+                            );
                             return;
-                        },
-                        OptionalTerm::Term(right) => {
-                            if experience.stmt.right.word == right.word {
-                                println!("  {}: {} {} {}", experience.id, experience.stmt.left.word, &experience.stmt.copula.to_string(), experience.stmt.right.word);
-                                return;
-                            }
                         }
                     }
                 },
-                OptionalTerm::Term(left) => {
-                    match &q.right {
-                        OptionalTerm::Question => {
-                            println!("  {}: {} {} {}", experience.id, experience.stmt.left.word, &experience.stmt.copula.to_string(), experience.stmt.right.word);
+                OptionalTerm::Term(left) => match &q.right {
+                    OptionalTerm::Question => {
+                        if experience.stmt.left.word == left.word {
+                            println!(
+                                "  {}: {} {} {}",
+                                experience.id,
+                                experience.stmt.left.word,
+                                &experience.stmt.copula.to_string(),
+                                experience.stmt.right.word
+                            );
                             return;
-                        },
-                        OptionalTerm::Term(right) => {
-                            if experience.stmt.left.word == left.word && experience.stmt.right.word == right.word {
-                                println!("  {}: {} {} {}", experience.id, experience.stmt.left.word, &experience.stmt.copula.to_string(), experience.stmt.right.word);
-                                return;
-                            }
+                        }
+                    }
+                    OptionalTerm::Term(right) => {
+                        if experience.stmt.left.word == left.word
+                            && experience.stmt.right.word == right.word
+                        {
+                            println!(
+                                "  {}: {} {} {}",
+                                experience.id,
+                                experience.stmt.left.word,
+                                &experience.stmt.copula.to_string(),
+                                experience.stmt.right.word
+                            );
+                            return;
                         }
                     }
                 },
