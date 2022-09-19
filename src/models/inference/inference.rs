@@ -3,7 +3,7 @@ use crate::models::{
     grammar::{copula::Copula, statement::Statement},
 };
 
-pub fn transitivity(
+fn transitivity(
     experience_base: &ExperienceBase,
     id_exp_1: usize,
     id_exp_2: usize,
@@ -35,6 +35,32 @@ pub fn transitivity(
     } else {
         Err("Transitivity not possible.")
     }
+}
+
+pub fn print_transitivity(
+    experience_base: &ExperienceBase,
+    id_exp_1: usize,
+    id_exp_2: usize,
+) -> Result<String, &str> {
+    let result = transitivity(experience_base, id_exp_1, id_exp_2)?;
+    let exp1 = experience_base
+        .experiences
+        .iter()
+        .find(|experience| experience.id == id_exp_1)
+        .ok_or("First id not found in experience base.")?;
+    let exp2 = experience_base
+        .experiences
+        .iter()
+        .find(|experience| experience.id == id_exp_2)
+        .ok_or("Second id not found in experience base.")?;
+    Ok(format!(
+        "  {}: {}\n  {}: {}\n  RESULT: {}",
+        id_exp_1,
+        exp1.stmt.to_string(),
+        id_exp_2,
+        exp2.stmt.to_string(),
+        result.to_string()
+    ))
 }
 
 // tests

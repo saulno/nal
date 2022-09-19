@@ -1,9 +1,9 @@
-use rustyline::{Editor, error::ReadlineError};
+use rustyline::{error::ReadlineError, Editor};
 
 use crate::models::{
     experience::{experience::Experience, experience_base::ExperienceBase},
     grammar::{query::Query, statement::Statement},
-    inference::{inference::transitivity, inference_instruction::InferenceInstruction},
+    inference::{inference::print_transitivity, inference_instruction::InferenceInstruction},
     repl::repl_instruction::ReplInstruction,
 };
 
@@ -41,11 +41,12 @@ impl Repl {
     }
 
     pub fn run(&mut self) {
-
         let mut rl = Editor::<()>::new().unwrap();
-        println!("Welcome to the Non-Axiomatic Logic Engine Repl.\n Type /help for a list of commands.");
+        println!(
+            "Welcome to the Non-Axiomatic Logic Engine Repl.\nType /help for a list of commands."
+        );
         loop {
-            self.counter += 1; 
+            self.counter += 1;
             let readline = rl.readline(format!("{}>> ", self.counter).as_str());
             match readline {
                 Ok(line) => {
@@ -105,28 +106,9 @@ impl Repl {
             Ok(ReplInstruction::Infer(args)) => {
                 let inference = InferenceInstruction::new(&args)?;
                 match inference {
-                    InferenceInstruction::Transitivity(id1, id2) => {
-                        let result = transitivity(&self.experience_base, id1, id2)?;
-                        let exp1 = self
-                            .experience_base
-                            .experiences
-                            .iter()
-                            .find(|experience| experience.id == id1)
-                            .ok_or("First id not found in experience base.")?;
-                        let exp2 = self
-                            .experience_base
-                            .experiences
-                            .iter()
-                            .find(|experience| experience.id == id2)
-                            .ok_or("Second id not found in experience base.")?;
-                        Ok(Action::Print(format!(
-                            "  {}: {}\n  {}: {}\n  RESULT: {}",
-                            id1,
-                            exp1.stmt.to_string(),
-                            id2,
-                            exp2.stmt.to_string(),
-                            result.to_string()
-                        )))
+                    InferenceInstruction::Transitivity(id_exp_1, id_exp_2) => {
+                        let result = print_transitivity(&self.experience_base, id_exp_1, id_exp_2)?;
+                        Ok(Action::Print(result))
                     }
                 }
             }
