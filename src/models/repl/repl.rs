@@ -1,4 +1,4 @@
-use std::io::{self, Write};
+use rustyline::{Editor, error::ReadlineError};
 
 use crate::models::{
     experience::{experience::Experience, experience_base::ExperienceBase},
@@ -11,10 +11,11 @@ const HELP_MSG: &str =
     "This is the repl for the Non Axiomatic Logic Engine. The following commands are available:
     /help   | /h: print this help message
     /exit   | /e: exit the repl
-    /insert | /i: insert a statement into the experience base
+    /assert | /a: insert a statement into the experience base
     /remove | /r: remove a statement from the experience base
     /list   | /l: list all statements in the experience base
     /query  | /q: query the experience base
+    /infer  | /i: infer a statement from the experience base
     /clear  | /c: clear the experience base\n";
 
 #[derive(Debug, PartialEq)]
@@ -40,23 +41,37 @@ impl Repl {
     }
 
     pub fn run(&mut self) {
+
+        let mut rl = Editor::<()>::new().unwrap();
+        println!("Welcome to the Non-Axiomatic Logic Engine Repl.\n Type /help for a list of commands.");
         loop {
-            self.counter += 1;
-
-            let mut input = String::new();
-
-            print!("{}> ", self.counter);
-            io::stdout().flush().unwrap();
-
-            io::stdin().read_line(&mut input).unwrap();
-
-            match self.execute(input) {
-                Ok(action) => match action {
-                    Action::Print(s) => println!("{}", s),
-                    Action::Nothing() => (),
-                    Action::Exit() => break,
-                },
-                Err(e) => println!("{}", e),
+            self.counter += 1; 
+            let readline = rl.readline(format!("{}>> ", self.counter).as_str());
+            match readline {
+                Ok(line) => {
+                    rl.add_history_entry(line.as_str());
+                    let action = self.execute(line);
+                    match action {
+                        Ok(action) => match action {
+                            Action::Print(msg) => println!("{}", msg),
+                            Action::Nothing() => (),
+                            Action::Exit() => break,
+                        },
+                        Err(msg) => println!("{}", msg),
+                    }
+                }
+                Err(ReadlineError::Interrupted) => {
+                    println!("CTRL-C");
+                    break;
+                }
+                Err(ReadlineError::Eof) => {
+                    println!("CTRL-D");
+                    break;
+                }
+                Err(err) => {
+                    println!("Error: {:?}", err);
+                    break;
+                }
             }
         }
     }
@@ -92,28 +107,24 @@ impl Repl {
                 match inference {
                     InferenceInstruction::Transitivity(id1, id2) => {
                         let result = transitivity(&self.experience_base, id1, id2)?;
-                        let stmt1 = self
+                        let exp1 = self
                             .experience_base
                             .experiences
                             .iter()
                             .find(|experience| experience.id == id1)
-                            .unwrap()
-                            .stmt
-                            .to_string();
-                        let stmt2 = self
+                            .ok_or("First id not found in experience base.")?;
+                        let exp2 = self
                             .experience_base
                             .experiences
                             .iter()
                             .find(|experience| experience.id == id2)
-                            .unwrap()
-                            .stmt
-                            .to_string();
+                            .ok_or("Second id not found in experience base.")?;
                         Ok(Action::Print(format!(
                             "  {}: {}\n  {}: {}\n  RESULT: {}",
                             id1,
-                            stmt1,
+                            exp1.stmt.to_string(),
                             id2,
-                            stmt2,
+                            exp2.stmt.to_string(),
                             result.to_string()
                         )))
                     }
