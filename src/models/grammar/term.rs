@@ -1,12 +1,20 @@
-#[derive(Clone, Debug, PartialEq)]
+use std::fmt;
+
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Term {
     pub word: String,
+}
+
+impl fmt::Display for Term {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.word)
+    }
 }
 
 impl Term {
     // Create new term
     pub fn new(word: &str) -> Result<Term, &str> {
-        if word.contains(" ") {
+        if word.contains(' ') {
             return Err("Term can't contain whitespaces");
         }
 
@@ -21,10 +29,6 @@ impl Term {
         Ok(Term {
             word: String::from(word),
         })
-    }
-
-    pub fn to_string(&self) -> String {
-        self.word.clone()
     }
 }
 

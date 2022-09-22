@@ -1,9 +1,29 @@
+use std::fmt;
+
 use crate::models::grammar::query::{OptionalTerm, Query};
 
-use super::experience::Experience;
+use super::experience_element::Experience;
 
 pub struct ExperienceBase {
     pub experiences: Vec<Experience>,
+}
+
+impl fmt::Display for ExperienceBase {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let result = self
+            .experiences
+            .iter()
+            .map(|experience| format!("{}: {}", experience.id, experience.stmt))
+            .collect::<Vec<String>>()
+            .join("\n");
+        write!(f, "{}", result)
+    }
+}
+
+impl Default for ExperienceBase {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ExperienceBase {
@@ -21,13 +41,13 @@ impl ExperienceBase {
         self.experiences.retain(|experience| experience.id != id);
     }
 
-    pub fn to_string(&self) -> String {
-        self.experiences
-            .iter()
-            .map(|experience| format!("{}: {}", experience.id, experience.stmt.to_string()))
-            .collect::<Vec<String>>()
-            .join("\n")
-    }
+    // pub fn to_string(&self) -> String {
+    //     self.experiences
+    //         .iter()
+    //         .map(|experience| format!("{}: {}", experience.id, experience.stmt))
+    //         .collect::<Vec<String>>()
+    //         .join("\n")
+    // }
 
     pub fn query(&self, q: Query) -> String {
         for experience in &self.experiences {
@@ -76,7 +96,7 @@ impl ExperienceBase {
                 },
             }
         }
-        return "  No matches found.".to_string();
+        "  No matches found.".to_string()
     }
 
     pub fn clear(&mut self) {

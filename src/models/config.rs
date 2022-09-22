@@ -1,6 +1,6 @@
 // Enum with the different options to run
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Config {
     Help(),
     Repl(),

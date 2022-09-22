@@ -1,10 +1,18 @@
+use std::fmt;
+
 use super::{copula::Copula, term::Term};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Statement {
     pub left: Term,
     pub copula: Copula,
     pub right: Term,
+}
+
+impl fmt::Display for Statement {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} {} {}", self.left, self.copula, self.right)
+    }
 }
 
 impl Statement {
@@ -23,15 +31,6 @@ impl Statement {
             copula,
             right,
         })
-    }
-
-    pub fn to_string(&self) -> String {
-        format!(
-            "{} {} {}",
-            self.left.to_string(),
-            self.copula.to_string(),
-            self.right.to_string()
-        )
     }
 }
 

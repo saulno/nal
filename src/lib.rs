@@ -2,7 +2,7 @@ pub mod models;
 
 use std::error::Error;
 
-use models::{config::Config, repl::repl::Repl};
+use models::{config::Config, repl::repl_console::ReplConsole};
 
 // run the program
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
@@ -12,7 +12,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         }
         Config::Repl() => {
             // println!("Repl");
-            let mut repl = Repl::new();
+            let mut repl = ReplConsole::new();
             repl.run();
         }
     }

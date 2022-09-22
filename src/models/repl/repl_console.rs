@@ -1,9 +1,9 @@
 use rustyline::{error::ReadlineError, Editor};
 
 use crate::models::{
-    experience::{experience::Experience, experience_base::ExperienceBase},
+    experience::{experience_base::ExperienceBase, experience_element::Experience},
     grammar::{query::Query, statement::Statement},
-    inference::{inference::print_transitivity, inference_instruction::InferenceInstruction},
+    inference::{inference_instruction::InferenceInstruction, inference_rule::print_transitivity},
     repl::repl_instruction::ReplInstruction,
 };
 
@@ -18,20 +18,26 @@ const HELP_MSG: &str =
     /infer  | /i: infer a statement from the experience base
     /clear  | /c: clear the experience base\n";
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Action {
     Print(String),
     Nothing(),
     Exit(),
 }
 
-pub struct Repl {
+pub struct ReplConsole {
     counter: usize,
     experience_current_id: usize,
     experience_base: ExperienceBase,
 }
 
-impl Repl {
+impl Default for ReplConsole {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ReplConsole {
     pub fn new() -> Self {
         Self {
             counter: 0,
@@ -101,7 +107,7 @@ impl Repl {
             Ok(ReplInstruction::List()) => Ok(Action::Print(self.experience_base.to_string())),
             Ok(ReplInstruction::Query(q)) => {
                 let query: Query = Query::new(&q)?;
-                Ok(Action::Print(self.experience_base.query(query).to_string()))
+                Ok(Action::Print(self.experience_base.query(query)))
             }
             Ok(ReplInstruction::Infer(args)) => {
                 let inference = InferenceInstruction::new(&args)?;
@@ -129,14 +135,14 @@ mod tests {
 
     #[test]
     fn test_new() {
-        let repl = Repl::new();
+        let repl = ReplConsole::new();
         assert_eq!(repl.counter, 0);
         assert_eq!(repl.experience_base.experiences.len(), 0);
     }
 
     #[test]
     fn test_execute_help() {
-        let mut repl = Repl::new();
+        let mut repl = ReplConsole::new();
         let action = repl.execute("/help".to_string()).unwrap();
         let expected_output = HELP_MSG;
         assert_eq!(action, Action::Print(expected_output.to_string()));
@@ -144,14 +150,14 @@ mod tests {
 
     #[test]
     fn test_execute_exit() {
-        let mut repl = Repl::new();
+        let mut repl = ReplConsole::new();
         let action = repl.execute("/exit".to_string()).unwrap();
         assert_eq!(action, Action::Exit());
     }
 
     #[test]
     fn test_execute_assert() {
-        let mut repl = Repl::new();
+        let mut repl = ReplConsole::new();
         let action = repl.execute("/assert a is b".to_string()).unwrap();
         assert_eq!(action, Action::Print("Ok.".to_string()));
         assert_eq!(repl.experience_base.experiences.len(), 1);
@@ -163,7 +169,7 @@ mod tests {
 
     #[test]
     fn test_execute_remove() {
-        let mut repl = Repl::new();
+        let mut repl = ReplConsole::new();
         let action = repl.execute("/assert a is b".to_string()).unwrap();
         assert_eq!(action, Action::Print("Ok.".to_string()));
         assert_eq!(repl.experience_base.experiences.len(), 1);
@@ -179,7 +185,7 @@ mod tests {
 
     #[test]
     fn test_execute_list() {
-        let mut repl = Repl::new();
+        let mut repl = ReplConsole::new();
         let action = repl.execute("/assert a is b".to_string()).unwrap();
         assert_eq!(action, Action::Print("Ok.".to_string()));
         let action = repl.execute("/assert b is c".to_string()).unwrap();
@@ -201,7 +207,7 @@ mod tests {
 
     #[test]
     fn test_execute_query() {
-        let mut repl = Repl::new();
+        let mut repl = ReplConsole::new();
         let action = repl.execute("/assert a is b".to_string()).unwrap();
         assert_eq!(action, Action::Print("Ok.".to_string()));
         let action = repl.execute("/assert b is c".to_string()).unwrap();
@@ -238,7 +244,7 @@ mod tests {
 
     #[test]
     fn test_execute_clear() {
-        let mut repl = Repl::new();
+        let mut repl = ReplConsole::new();
         let action = repl.execute("/assert a is b".to_string()).unwrap();
         assert_eq!(action, Action::Print("Ok.".to_string()));
         let action = repl.execute("/assert b is c".to_string()).unwrap();
@@ -260,7 +266,7 @@ mod tests {
 
     #[test]
     fn test_execute_infer_transitivity() {
-        let mut repl = Repl::new();
+        let mut repl = ReplConsole::new();
         repl.execute("/assert a is b".to_string()).unwrap();
         repl.execute("/assert b is c".to_string()).unwrap();
         repl.execute("/assert c is d".to_string()).unwrap();

@@ -1,6 +1,16 @@
-#[derive(Copy, Clone, Debug, PartialEq)]
+use std::fmt;
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Copula {
     Inheritance(),
+}
+
+impl fmt::Display for Copula {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Copula::Inheritance() => write!(f, "->"),
+        }
+    }
 }
 
 impl Copula {
@@ -9,12 +19,6 @@ impl Copula {
         match symbols {
             "is" | "->" => Ok(Copula::Inheritance()),
             _ => Err("Invalid copula"),
-        }
-    }
-
-    pub fn to_string(&self) -> String {
-        match self {
-            Copula::Inheritance() => "->".to_string(),
         }
     }
 }

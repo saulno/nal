@@ -1,16 +1,33 @@
+use std::fmt;
+
 use super::{copula::Copula, term::Term};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum OptionalTerm {
     Term(Term),
     Question,
 }
 
-#[derive(Debug, PartialEq)]
+impl fmt::Display for OptionalTerm {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            OptionalTerm::Term(term) => write!(f, "{}", term),
+            OptionalTerm::Question => write!(f, "?"),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
 pub struct Query {
     pub left: OptionalTerm,
     pub copula: Copula,
     pub right: OptionalTerm,
+}
+
+impl fmt::Display for Query {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} {} {}", self.left, self.copula, self.right)
+    }
 }
 
 impl Query {
@@ -50,32 +67,6 @@ impl Query {
                 copula,
                 right,
             })
-        }
-    }
-
-    pub fn to_string(&self) -> String {
-        match self {
-            Query {
-                left: OptionalTerm::Term(left),
-                copula,
-                right: OptionalTerm::Term(right),
-            } => format!(
-                "{} {} {}",
-                left.to_string(),
-                copula.to_string(),
-                right.to_string()
-            ),
-            Query {
-                left: OptionalTerm::Question,
-                copula,
-                right: OptionalTerm::Term(right),
-            } => format!("? {} {}", copula.to_string(), right.to_string()),
-            Query {
-                left: OptionalTerm::Term(left),
-                copula,
-                right: OptionalTerm::Question,
-            } => format!("{} {} ?", left.to_string(), copula.to_string()),
-            _ => panic!("Invalid query"),
         }
     }
 }

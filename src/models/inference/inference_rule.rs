@@ -55,11 +55,7 @@ pub fn print_transitivity(
         .ok_or("Second id not found in experience base.")?;
     Ok(format!(
         "  {}: {}\n  {}: {}\n  RESULT: {}",
-        id_exp_1,
-        exp1.stmt.to_string(),
-        id_exp_2,
-        exp2.stmt.to_string(),
-        result.to_string()
+        id_exp_1, exp1.stmt, id_exp_2, exp2.stmt, result
     ))
 }
 
@@ -68,7 +64,7 @@ pub fn print_transitivity(
 mod tests {
     use super::*;
     use crate::models::{
-        experience::experience::Experience,
+        experience::experience_element::Experience,
         grammar::{copula::Copula, statement::Statement, term::Term},
     };
 
