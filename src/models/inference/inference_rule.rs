@@ -1,6 +1,6 @@
 use crate::models::{
     experience::experience_base::ExperienceBase,
-    grammar::{copula::Copula, statement::Statement},
+    parser::{copula::Copula, statement::Statement},
 };
 
 fn transitivity(
@@ -64,8 +64,8 @@ pub fn print_transitivity(
 mod tests {
     use super::*;
     use crate::models::{
-        experience::experience_element::Experience,
-        grammar::{copula::Copula, statement::Statement, term::Term},
+        experience::experience_element::ExperienceElement,
+        parser::{copula::Copula, statement::Statement, term::Term},
     };
 
     #[test]
@@ -77,7 +77,7 @@ mod tests {
     #[test]
     fn test_transitivity() {
         let mut experience_base = ExperienceBase::new();
-        let experience_1 = Experience::new(
+        let experience_1 = ExperienceElement::new(
             Statement {
                 left: Term::new("a").unwrap(),
                 copula: Copula::new("is").unwrap(),
@@ -85,7 +85,7 @@ mod tests {
             },
             1,
         );
-        let experience_2 = Experience::new(
+        let experience_2 = ExperienceElement::new(
             Statement {
                 left: Term::new("b").unwrap(),
                 copula: Copula::new("is").unwrap(),
@@ -94,7 +94,7 @@ mod tests {
             2,
         );
 
-        let experience_3 = Experience::new(
+        let experience_3 = ExperienceElement::new(
             Statement {
                 left: Term::new("d").unwrap(),
                 copula: Copula::new("is").unwrap(),

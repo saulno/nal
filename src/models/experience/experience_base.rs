@@ -1,11 +1,15 @@
-use std::fmt;
+use std::{collections::HashSet, fmt};
 
-use crate::models::grammar::query::{OptionalTerm, Query};
+use crate::models::parser::{
+    query::{OptionalTerm, Query},
+    term::Term,
+};
 
-use super::experience_element::Experience;
+use super::experience_element::ExperienceElement;
 
 pub struct ExperienceBase {
-    pub experiences: Vec<Experience>,
+    pub experiences: Vec<ExperienceElement>,
+    pub terms: HashSet<Term>,
 }
 
 impl fmt::Display for ExperienceBase {
@@ -30,15 +34,32 @@ impl ExperienceBase {
     pub fn new() -> Self {
         Self {
             experiences: Vec::new(),
+            terms: HashSet::new(),
         }
     }
 
-    pub fn add(&mut self, experience: Experience) {
+    pub fn add(&mut self, experience: ExperienceElement) {
+        self.terms.insert(experience.stmt.left.clone());
+        self.terms.insert(experience.stmt.right.clone());
         self.experiences.push(experience);
     }
 
-    pub fn remove(&mut self, id: usize) {
-        self.experiences.retain(|experience| experience.id != id);
+    pub fn remove(&mut self, id: usize) -> Result<(), &str> {
+        // self.experiences.retain(|experience| experience.id != id);
+        let index = match self
+            .experiences
+            .iter()
+            .position(|experience| experience.id == id)
+        {
+            Some(index) => index,
+            None => return Err("Experience id not found."),
+        };
+        let left = self.experiences[index].stmt.left.clone();
+        let right = self.experiences[index].stmt.right.clone();
+        self.terms.remove(&left);
+        self.terms.remove(&right);
+        self.experiences.remove(index);
+        Ok(())
     }
 
     // pub fn to_string(&self) -> String {
@@ -108,7 +129,7 @@ impl ExperienceBase {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::grammar::{
+    use crate::models::parser::{
         copula::Copula, query::OptionalTerm, statement::Statement, term::Term,
     };
 
@@ -122,7 +143,7 @@ mod tests {
     #[test]
     fn test_experience_base_add() {
         let mut experience_base = ExperienceBase::new();
-        let experience = Experience::new(
+        let experience = ExperienceElement::new(
             Statement {
                 left: Term::new("a").unwrap(),
                 copula: Copula::new("is").unwrap(),
@@ -139,7 +160,7 @@ mod tests {
     #[test]
     fn test_experience_base_remove() {
         let mut experience_base = ExperienceBase::new();
-        let experience = Experience::new(
+        let experience = ExperienceElement::new(
             Statement {
                 left: Term::new("a").unwrap(),
                 copula: Copula::new("is").unwrap(),
@@ -151,14 +172,14 @@ mod tests {
         experience_base.add(experience);
         assert_eq!(experience_base.experiences.len(), 1);
 
-        experience_base.remove(1);
+        experience_base.remove(1).unwrap();
         assert_eq!(experience_base.experiences.len(), 0);
     }
 
     #[test]
     fn test_experience_base_to_string() {
         let mut experience_base = ExperienceBase::new();
-        let experience = Experience::new(
+        let experience = ExperienceElement::new(
             Statement {
                 left: Term::new("a").unwrap(),
                 copula: Copula::new("is").unwrap(),
@@ -175,7 +196,7 @@ mod tests {
     #[test]
     fn test_experience_base_query() {
         let mut experience_base = ExperienceBase::new();
-        let experience = Experience::new(
+        let experience = ExperienceElement::new(
             Statement {
                 left: Term::new("a").unwrap(),
                 copula: Copula::new("is").unwrap(),
@@ -199,7 +220,7 @@ mod tests {
     #[test]
     fn test_experience_base_clear() {
         let mut experience_base = ExperienceBase::new();
-        let experience = Experience::new(
+        let experience = ExperienceElement::new(
             Statement {
                 left: Term::new("a").unwrap(),
                 copula: Copula::new("is").unwrap(),

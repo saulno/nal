@@ -17,14 +17,15 @@ impl fmt::Display for Statement {
 
 impl Statement {
     // Create new statement
-    pub fn new(tokens: &[String]) -> Result<Statement, &str> {
+    pub fn new(s: &str) -> Result<Statement, &str> {
+        let tokens: Vec<&str> = s.split_whitespace().collect();
         if tokens.len() != 3 {
             return Err("Invalid statement: Expected <term> <copula> <term>");
         }
 
-        let left = Term::new(&tokens[0])?;
-        let copula = Copula::new(&tokens[1])?;
-        let right = Term::new(&tokens[2])?;
+        let left = Term::new(tokens[0])?;
+        let copula = Copula::new(tokens[1])?;
+        let right = Term::new(tokens[2])?;
 
         Ok(Statement {
             left,
@@ -42,7 +43,7 @@ mod tests {
     #[test]
     fn test_new() {
         assert_eq!(
-            Statement::new(&vec!["a".to_string(), "is".to_string(), "b".to_string()]).unwrap(),
+            Statement::new("a is b").unwrap(),
             Statement {
                 left: Term::new("a").unwrap(),
                 copula: Copula::Inheritance(),
@@ -50,37 +51,17 @@ mod tests {
             }
         );
         assert_eq!(
-            Statement::new(&vec!["a".to_string(), "->".to_string(), "b".to_string()]).unwrap(),
+            Statement::new("a -> b").unwrap(),
             Statement {
                 left: Term::new("a").unwrap(),
                 copula: Copula::Inheritance(),
                 right: Term::new("b").unwrap(),
             }
         );
-        assert_eq!(
-            Statement::new(&vec![
-                "a".to_string(),
-                "is".to_string(),
-                "b".to_string(),
-                "c".to_string()
-            ])
-            .is_err(),
-            true
-        );
-        assert_eq!(
-            Statement::new(&vec![
-                "a".to_string(),
-                "is not".to_string(),
-                "b".to_string()
-            ])
-            .is_err(),
-            true
-        );
-        assert_eq!(
-            Statement::new(&vec!["a".to_string(), "is".to_string()]).is_err(),
-            true
-        );
-        assert_eq!(Statement::new(&vec![]).is_err(), true);
+        assert_eq!(Statement::new("a is b c").is_err(), true);
+        assert_eq!(Statement::new("a is not b").is_err(), true);
+        assert_eq!(Statement::new("a is").is_err(), true);
+        assert_eq!(Statement::new("").is_err(), true);
     }
 
     #[test]

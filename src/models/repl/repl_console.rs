@@ -1,9 +1,9 @@
 use rustyline::{error::ReadlineError, Editor};
 
 use crate::models::{
-    experience::{experience_base::ExperienceBase, experience_element::Experience},
-    grammar::{query::Query, statement::Statement},
+    experience::{experience_base::ExperienceBase, experience_element::ExperienceElement},
     inference::{inference_instruction::InferenceInstruction, inference_rule::print_transitivity},
+    parser::{query::Query, statement::Statement},
     repl::repl_instruction::ReplInstruction,
 };
 
@@ -93,15 +93,16 @@ impl ReplConsole {
             Ok(ReplInstruction::Help()) => Ok(Action::Print(HELP_MSG.to_string())),
             Ok(ReplInstruction::Exit()) => Ok(Action::Exit()),
             Ok(ReplInstruction::Assert(stmt)) => {
-                let stmt: Statement = Statement::new(&stmt)?;
-                let experience: Experience = Experience::new(stmt, self.experience_current_id);
+                let stmt: Statement = Statement::new(&stmt.join(" "))?;
+                let experience: ExperienceElement =
+                    ExperienceElement::new(stmt, self.experience_current_id);
                 self.experience_current_id += 1;
 
                 self.experience_base.add(experience);
                 Ok(Action::Print("Ok.".to_string()))
             }
             Ok(ReplInstruction::Remove(id)) => {
-                self.experience_base.remove(id);
+                self.experience_base.remove(id)?;
                 Ok(Action::Print("Ok.".to_string()))
             }
             Ok(ReplInstruction::List()) => Ok(Action::Print(self.experience_base.to_string())),

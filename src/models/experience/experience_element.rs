@@ -1,15 +1,15 @@
 use chrono::NaiveDateTime;
 
-use crate::models::grammar::statement::Statement;
+use crate::models::parser::statement::Statement;
 
-pub struct Experience {
+pub struct ExperienceElement {
     pub id: usize,
     pub stmt: Statement,
     pub created_at: NaiveDateTime,
     // pub updated_at: NaiveDateTime,
 }
 
-impl Experience {
+impl ExperienceElement {
     pub fn new(stmt: Statement, id: usize) -> Self {
         let now: NaiveDateTime = chrono::Local::now().naive_local();
 
