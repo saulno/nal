@@ -108,7 +108,7 @@ impl ReplConsole {
             }
             Ok(ReplInstruction::List()) => Ok(Action::Print(self.experience_base.to_string())),
             Ok(ReplInstruction::Query(q)) => {
-                let query: Query = Query::new(&q)?;
+                let query: Query = Query::new(&q.join(" "))?;
                 Ok(Action::Print(self.experience_base.query(query)))
             }
             Ok(ReplInstruction::Infer(args)) => {
@@ -203,7 +203,7 @@ mod tests {
         );
 
         let action = repl.execute("/list".to_string()).unwrap();
-        let expected_output = "1: a -> b\n2: b -> c";
+        let expected_output = "1: a -> b <1, 0.99>\n2: b -> c <1, 0.99>";
         assert_eq!(action, Action::Print(expected_output.to_string()));
     }
 
@@ -225,19 +225,19 @@ mod tests {
         );
 
         let action = repl.execute("/query a is ?".to_string()).unwrap();
-        let expected_output = "  1: a -> b";
+        let expected_output = "  1: a -> b <1, 0.99>";
         assert_eq!(action, Action::Print(expected_output.to_string()));
 
         let action = repl.execute("/query ? is c".to_string()).unwrap();
-        let expected_output = "  2: b -> c";
+        let expected_output = "  2: b -> c <1, 0.99>";
         assert_eq!(action, Action::Print(expected_output.to_string()));
 
         let action = repl.execute("/query a is b".to_string()).unwrap();
-        let expected_output = "  1: a -> b";
+        let expected_output = "  1: a -> b <1, 0.99>";
         assert_eq!(action, Action::Print(expected_output.to_string()));
 
         let action = repl.execute("/query a is c".to_string()).unwrap();
-        let expected_output = "  No matches found.";
+        let expected_output = "  a -> c <0.5, 0.8>";
         assert_eq!(action, Action::Print(expected_output.to_string()));
 
         let action = repl.execute("/query ? is ?".to_string());
