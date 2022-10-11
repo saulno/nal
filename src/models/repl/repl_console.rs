@@ -16,6 +16,7 @@ const HELP_MSG: &str =
     /list   | /l: list all statements in the experience base
     /query  | /q: query the experience base
     /infer  | /i: infer a statement from the experience base
+        transitivity | trans | t <id1> <id2>: infer a statement from the experience base using transitivity
     /clear  | /c: clear the experience base\n";
 
 #[derive(Debug, PartialEq, Eq)]
