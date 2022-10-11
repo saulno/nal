@@ -32,4 +32,15 @@ impl ExperienceElement {
             truth_value: TruthValue::new().unwrap(), // updated_at: now,
         }
     }
+
+    pub fn new_with_truth_value(stmt: Statement, id: usize, truth_value: TruthValue) -> Self {
+        let now: NaiveDateTime = chrono::Local::now().naive_local();
+
+        Self {
+            id,
+            stmt,
+            created_at: now,
+            truth_value, // updated_at: now,
+        }
+    }
 }

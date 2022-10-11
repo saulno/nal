@@ -163,7 +163,7 @@ mod tests {
 
         assert_eq!(
             experience_base.to_string(),
-            "1: a -> b <1, 0.99>".to_string()
+            "1: a -> b <1.00, 0.99>".to_string()
         );
     }
 
@@ -176,7 +176,7 @@ mod tests {
 
         assert_eq!(
             experience_base.query(Query::new("? is b").unwrap()),
-            "  1: a -> b <1, 0.99>".to_string()
+            "  1: a -> b <1.00, 0.99>".to_string()
         );
     }
 

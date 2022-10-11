@@ -5,6 +5,7 @@ use crate::models::{
     inference::{inference_instruction::InferenceInstruction, inference_rule::print_transitivity},
     parser::{query::Query, statement::Statement},
     repl::repl_instruction::ReplInstruction,
+    semantics::truth_value::TruthValue,
 };
 
 const HELP_MSG: &str =
@@ -93,10 +94,19 @@ impl ReplConsole {
         match ReplInstruction::new(&instruction) {
             Ok(ReplInstruction::Help()) => Ok(Action::Print(HELP_MSG.to_string())),
             Ok(ReplInstruction::Exit()) => Ok(Action::Exit()),
-            Ok(ReplInstruction::Assert(stmt)) => {
-                let stmt: Statement = Statement::new(&stmt.join(" "))?;
+            Ok(ReplInstruction::Assert(s)) => {
+                let stmt: Statement = Statement::new(&s[..3].join(" "))?;
                 let experience: ExperienceElement =
-                    ExperienceElement::new(stmt, self.experience_current_id);
+                    if TruthValue::new_from_str(&s[3..].join(" ")).is_ok() {
+                        let truth_value = TruthValue::new_from_str(&s[3..].join(" ")).unwrap();
+                        ExperienceElement::new_with_truth_value(
+                            stmt,
+                            self.experience_current_id,
+                            truth_value,
+                        )
+                    } else {
+                        ExperienceElement::new(stmt, self.experience_current_id)
+                    };
                 self.experience_current_id += 1;
 
                 self.experience_base.add(experience);
@@ -164,8 +174,18 @@ mod tests {
         assert_eq!(action, Action::Print("Ok.".to_string()));
         assert_eq!(repl.experience_base.experiences.len(), 1);
         assert_eq!(
-            repl.experience_base.experiences[0].stmt.to_string(),
-            "a -> b"
+            repl.experience_base.experiences[0].to_string(),
+            "1: a -> b <1.00, 0.99>"
+        );
+
+        let action = repl
+            .execute("/assert c is d <0.787, 0.5678>".to_string())
+            .unwrap();
+        assert_eq!(action, Action::Print("Ok.".to_string()));
+        assert_eq!(repl.experience_base.experiences.len(), 2);
+        assert_eq!(
+            repl.experience_base.experiences[1].to_string(),
+            "2: c -> d <0.79, 0.57>"
         );
     }
 
@@ -203,7 +223,7 @@ mod tests {
         );
 
         let action = repl.execute("/list".to_string()).unwrap();
-        let expected_output = "1: a -> b <1, 0.99>\n2: b -> c <1, 0.99>";
+        let expected_output = "1: a -> b <1.00, 0.99>\n2: b -> c <1.00, 0.99>";
         assert_eq!(action, Action::Print(expected_output.to_string()));
     }
 
@@ -225,19 +245,19 @@ mod tests {
         );
 
         let action = repl.execute("/query a is ?".to_string()).unwrap();
-        let expected_output = "  1: a -> b <1, 0.99>";
+        let expected_output = "  1: a -> b <1.00, 0.99>";
         assert_eq!(action, Action::Print(expected_output.to_string()));
 
         let action = repl.execute("/query ? is c".to_string()).unwrap();
-        let expected_output = "  2: b -> c <1, 0.99>";
+        let expected_output = "  2: b -> c <1.00, 0.99>";
         assert_eq!(action, Action::Print(expected_output.to_string()));
 
         let action = repl.execute("/query a is b".to_string()).unwrap();
-        let expected_output = "  1: a -> b <1, 0.99>";
+        let expected_output = "  1: a -> b <1.00, 0.99>";
         assert_eq!(action, Action::Print(expected_output.to_string()));
 
         let action = repl.execute("/query a is c".to_string()).unwrap();
-        let expected_output = "  a -> c <0.5, 0.8>";
+        let expected_output = "  a -> c <0.50, 0.80>";
         assert_eq!(action, Action::Print(expected_output.to_string()));
 
         let action = repl.execute("/query ? is ?".to_string());

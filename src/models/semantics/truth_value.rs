@@ -15,7 +15,8 @@ pub struct TruthValue {
 
 impl fmt::Display for TruthValue {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "<{}, {}>", self.freq, self.conf)
+        let precision = 2;
+        write!(f, "<{0:.2$}, {1:.2$}>", self.freq, self.conf, precision)
     }
 }
 
@@ -26,6 +27,31 @@ impl TruthValue {
             freq: 1.0,
             conf: 0.99,
         })
+    }
+
+    pub fn new_from_str(s: &str) -> Result<TruthValue, String> {
+        let x: &[_] = &['<', '>'];
+        let tokens = s.trim_matches(x);
+        let tokens = tokens.replace(' ', "");
+        let tokens: Vec<&str> = tokens.split(',').collect();
+        if tokens.len() != 2 {
+            return Err("Invalid truth value: Expected < freq, conf >".to_string());
+        }
+
+        let freq = tokens[0].parse::<f64>().map_err(|_| {
+            format!(
+                "Invalid truth value: Expected <freq> <conf>, got <{}> <{}>",
+                tokens[0], tokens[1]
+            )
+        })?;
+        let conf = tokens[1].parse::<f64>().map_err(|_| {
+            format!(
+                "Invalid truth value: Expected <freq> <conf>, got <{}> <{}>",
+                tokens[0], tokens[1]
+            )
+        })?;
+
+        Ok(TruthValue { freq, conf })
     }
 
     pub fn from_statement<'a>(
