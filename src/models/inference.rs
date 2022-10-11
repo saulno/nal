@@ -1,2 +1,9 @@
+pub mod abduction;
+pub mod conversion;
+pub mod deduction;
+pub mod exemplification;
+pub mod induction;
 pub mod inference_instruction;
 pub mod inference_rule;
+pub mod revision;
+pub mod selection;

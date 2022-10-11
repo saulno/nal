@@ -2,7 +2,7 @@ use std::fmt;
 
 use super::{copula::Copula, term::Term};
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Statement {
     pub left: Term,
     pub copula: Copula,

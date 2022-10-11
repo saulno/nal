@@ -7,10 +7,10 @@ use crate::models::{
 
 use super::meaning::{extension_from_term, intension_from_term};
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct TruthValue {
-    freq: f64,
-    conf: f64,
+    pub freq: f64,
+    pub conf: f64,
 }
 
 impl fmt::Display for TruthValue {

@@ -2,7 +2,9 @@ use rustyline::{error::ReadlineError, Editor};
 
 use crate::models::{
     experience::{experience_base::ExperienceBase, experience_element::ExperienceElement},
-    inference::{inference_instruction::InferenceInstruction, inference_rule::print_transitivity},
+    inference::{
+        inference_instruction::InferenceInstruction, inference_rule::print_inference_result,
+    },
     parser::{query::Query, statement::Statement},
     repl::repl_instruction::ReplInstruction,
     semantics::truth_value::TruthValue,
@@ -17,7 +19,13 @@ const HELP_MSG: &str =
     /list   | /l: list all statements in the experience base
     /query  | /q: query the experience base
     /infer  | /i: infer a statement from the experience base
-        transitivity | trans | t <id1> <id2>: infer a statement from the experience base using transitivity
+        revision        | rev | r <id1> <id2>: infer a statement from the experience base using revision
+        selection       | sel | s <id1> <id2>: infer a statement from the experience base using selection
+        deduction       | ded | d <id1> <id2>: infer a statement from the experience base using deduction
+        induction       | ind | i <id1> <id2>: infer a statement from the experience base using induction
+        exemplification | exm | e <id1> <id2>: infer a statement from the experience base using exemplification
+        abduction       | abd | a <id1> <id2>: infer a statement from the experience base using abduction
+        conversion      | cnv | c <id>: infer a statement from the experience base using conversion
     /clear  | /c: clear the experience base\n";
 
 #[derive(Debug, PartialEq, Eq)]
@@ -123,12 +131,8 @@ impl ReplConsole {
             }
             Ok(ReplInstruction::Infer(args)) => {
                 let inference = InferenceInstruction::new(&args)?;
-                match inference {
-                    InferenceInstruction::Transitivity(id_exp_1, id_exp_2) => {
-                        let result = print_transitivity(&self.experience_base, id_exp_1, id_exp_2)?;
-                        Ok(Action::Print(result))
-                    }
-                }
+                let result = print_inference_result(&self.experience_base, inference)?;
+                Ok(Action::Print(result))
             }
             Ok(ReplInstruction::Clear()) => {
                 self.experience_base.clear();
@@ -287,14 +291,15 @@ mod tests {
     }
 
     #[test]
-    fn test_execute_infer_transitivity() {
+    fn test_execute_infer_deduction() {
         let mut repl = ReplConsole::new();
         repl.execute("/assert a is b".to_string()).unwrap();
         repl.execute("/assert b is c".to_string()).unwrap();
         repl.execute("/assert c is d".to_string()).unwrap();
 
-        let action = repl.execute("/infer transitivity 1 2".to_string()).unwrap();
-        let expected_output = "  1: a -> b\n  2: b -> c\n  RESULT: a -> c";
+        let action = repl.execute("/infer deduction 1 2".to_string()).unwrap();
+        let expected_output =
+            "  1: a -> b <1.00, 0.99>\n  2: b -> c <1.00, 0.99>\n  RESULT: a -> c <1.00, 0.98>";
         assert_eq!(action, Action::Print(expected_output.to_string()));
     }
 }
