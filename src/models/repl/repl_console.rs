@@ -1,3 +1,5 @@
+use std::fs;
+
 use rustyline::{error::ReadlineError, Editor};
 
 use crate::models::{
@@ -14,6 +16,7 @@ const HELP_MSG: &str =
     "This is the repl for the Non Axiomatic Logic Engine. The following commands are available:
     /help   | /h: print this help message
     /exit   | /e: exit the repl
+    /file   | /f: load and execute a file
     /assert | /a: insert a statement into the experience base
     /remove | /r: remove a statement from the experience base
     /list   | /l: list all statements in the experience base
@@ -136,6 +139,37 @@ impl ReplConsole {
             }
             Ok(ReplInstruction::Clear()) => {
                 self.experience_base.clear();
+                Ok(Action::Print("Ok.".to_string()))
+            }
+            Ok(ReplInstruction::File(path)) => {
+                // open file and read it
+                let file = if fs::read_to_string(&path).is_ok() {
+                    fs::read_to_string(path).unwrap()
+                } else {
+                    return Err("File not found.".to_string());
+                };
+                // remove comment lines that start with #
+                let lines = file
+                    .lines()
+                    .filter(|line| !line.starts_with('#'))
+                    .collect::<Vec<&str>>();
+                // remove empty lines
+                let lines: Vec<&str> = lines
+                    .iter()
+                    .filter(|line| !line.is_empty())
+                    .copied()
+                    .collect();
+                // execute each line
+                for line in lines {
+                    println!("Executing: {}", line);
+                    let res = self.execute(line.to_string())?;
+                    match res {
+                        Action::Print(msg) => println!("{}", msg),
+                        Action::Nothing() => (),
+                        Action::Exit() => break,
+                    }
+                }
+
                 Ok(Action::Print("Ok.".to_string()))
             }
             Ok(ReplInstruction::Unknown()) => Ok(Action::Print("Unknown command.".to_string())),
@@ -301,5 +335,32 @@ mod tests {
         let expected_output =
             "  1: a -> b <1.00, 0.99>\n  2: b -> c <1.00, 0.99>\n  RESULT: a -> c <1.00, 0.98>";
         assert_eq!(action, Action::Print(expected_output.to_string()));
+    }
+
+    #[test]
+    fn test_execute_file() {
+        let mut repl = ReplConsole::new();
+        let action = match repl.execute("/file script.nal".to_string()) {
+            Ok(action) => action,
+            Err(err) => Action::Print(format!("Error: {}", err)),
+        };
+        assert_eq!(action, Action::Print("Ok.".to_string()));
+        assert_eq!(repl.experience_base.experiences.len(), 4);
+        assert_eq!(
+            repl.experience_base.experiences[0].stmt.to_string(),
+            "robin -> bird"
+        );
+        assert_eq!(
+            repl.experience_base.experiences[1].stmt.to_string(),
+            "bird -> animal"
+        );
+        assert_eq!(
+            repl.experience_base.experiences[2].stmt.to_string(),
+            "saul -> human"
+        );
+        assert_eq!(
+            repl.experience_base.experiences[3].stmt.to_string(),
+            "human -> animal"
+        );
     }
 }
