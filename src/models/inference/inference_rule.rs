@@ -1,4 +1,8 @@
-use crate::models::experience::experience_base::ExperienceBase;
+use crate::models::{
+    experience::{experience_base::ExperienceBase, experience_element::ExperienceElement},
+    parser::statement::Statement,
+    semantics::truth_value::TruthValue,
+};
 
 use super::{
     abduction::abduction, conversion::conversion, deduction::deduction,
@@ -6,10 +10,10 @@ use super::{
     inference_instruction::InferenceInstruction, revision::revision, selection::selection,
 };
 
-pub fn print_inference_result(
+fn execute_inference(
     experience_base: &ExperienceBase,
     inference_instruction: InferenceInstruction,
-) -> Result<String, &str> {
+) -> Result<((Statement, TruthValue), usize, usize), &str> {
     let (result, id_exp_1, id_exp_2) = match inference_instruction {
         InferenceInstruction::Revision(id_exp_1, id_exp_2) => (
             revision(experience_base, id_exp_1, id_exp_2)?,
@@ -46,6 +50,16 @@ pub fn print_inference_result(
         }
     };
 
+    Ok((result, id_exp_1, id_exp_2))
+}
+
+pub fn print_inference_result(
+    experience_base: &ExperienceBase,
+    inference_instruction: InferenceInstruction,
+) -> Result<String, &str> {
+    let ((stmt, truth_value), id_exp_1, id_exp_2) =
+        execute_inference(experience_base, inference_instruction)?;
+
     let exp1 = experience_base
         .experiences
         .iter()
@@ -60,10 +74,49 @@ pub fn print_inference_result(
     if id_exp_1 != id_exp_2 {
         Ok(format!(
             "  {}\n  {}\n  RESULT: {} {}",
-            exp1, exp2, result.0, result.1
+            exp1, exp2, stmt, truth_value
         ))
     } else {
-        Ok(format!("  {}\n  RESULT: {} {}", exp1, result.0, result.1))
+        Ok(format!("  {}\n  RESULT: {} {}", exp1, stmt, truth_value))
+    }
+}
+
+pub fn infer_and_update(
+    experience_base: &mut ExperienceBase,
+    inference_instruction: InferenceInstruction,
+) -> Result<String, &str> {
+    let clone_experience_base = experience_base.clone();
+    let ((stmt, truth_value), id_exp_1, id_exp_2) =
+        match execute_inference(&clone_experience_base, inference_instruction) {
+            Ok(result) => result,
+            Err(_err) => return Err("Error while executing inference."),
+        };
+
+    let new_id = experience_base.get_next_id();
+    experience_base.add(ExperienceElement::new_with_truth_value(
+        stmt.clone(),
+        new_id,
+        truth_value.clone(),
+    ));
+
+    let exp1 = experience_base
+        .experiences
+        .iter()
+        .find(|experience| experience.id == id_exp_1)
+        .ok_or("First id not found in experience base.")?;
+    let exp2 = experience_base
+        .experiences
+        .iter()
+        .find(|experience| experience.id == id_exp_2)
+        .ok_or("Second id not found in experience base.")?;
+
+    if id_exp_1 != id_exp_2 {
+        Ok(format!(
+            "  {}\n  {}\n  RESULT: {} {}",
+            exp1, exp2, stmt, truth_value
+        ))
+    } else {
+        Ok(format!("  {}\n  RESULT: {} {}", exp1, stmt, truth_value))
     }
 }
 

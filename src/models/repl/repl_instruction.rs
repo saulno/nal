@@ -7,6 +7,7 @@ pub enum ReplInstruction {
     List(),
     Query(Vec<String>),
     Infer(Vec<String>),
+    InferUpdate(Vec<String>),
     Clear(),
     File(String),
     Unknown(),
@@ -30,6 +31,7 @@ impl ReplInstruction {
             }
             "/query" | "/q" => Ok(ReplInstruction::Query(instructions[1..].to_vec())),
             "/infer" | "/i" => Ok(ReplInstruction::Infer(instructions[1..].to_vec())),
+            "/infer+" | "/i+" => Ok(ReplInstruction::InferUpdate(instructions[1..].to_vec())),
             "/file" | "/f" => Ok(ReplInstruction::File(instructions[1].to_string())),
             _ => Ok(ReplInstruction::Unknown()),
         }

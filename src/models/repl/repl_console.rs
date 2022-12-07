@@ -5,7 +5,8 @@ use rustyline::{error::ReadlineError, Editor};
 use crate::models::{
     experience::{experience_base::ExperienceBase, experience_element::ExperienceElement},
     inference::{
-        inference_instruction::InferenceInstruction, inference_rule::print_inference_result,
+        inference_instruction::InferenceInstruction,
+        inference_rule::{infer_and_update, print_inference_result},
     },
     parser::{query::Query, statement::Statement},
     repl::repl_instruction::ReplInstruction,
@@ -135,6 +136,11 @@ impl ReplConsole {
             Ok(ReplInstruction::Infer(args)) => {
                 let inference = InferenceInstruction::new(&args)?;
                 let result = print_inference_result(&self.experience_base, inference)?;
+                Ok(Action::Print(result))
+            }
+            Ok(ReplInstruction::InferUpdate(args)) => {
+                let inference = InferenceInstruction::new(&args)?;
+                let result = infer_and_update(&mut self.experience_base, inference)?;
                 Ok(Action::Print(result))
             }
             Ok(ReplInstruction::Clear()) => {

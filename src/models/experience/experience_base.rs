@@ -11,9 +11,11 @@ use crate::models::{
 
 use super::experience_element::ExperienceElement;
 
+#[derive(Clone)]
 pub struct ExperienceBase {
     pub experiences: Vec<ExperienceElement>,
     pub terms: HashSet<Term>,
+    pub last_id: usize,
 }
 
 impl fmt::Display for ExperienceBase {
@@ -39,13 +41,19 @@ impl ExperienceBase {
         Self {
             experiences: Vec::new(),
             terms: HashSet::new(),
+            last_id: 0,
         }
+    }
+
+    pub fn get_next_id(&self) -> usize {
+        self.last_id + 1
     }
 
     pub fn add(&mut self, experience: ExperienceElement) {
         self.terms.insert(experience.stmt.left.clone());
         self.terms.insert(experience.stmt.right.clone());
         self.experiences.push(experience);
+        self.last_id += 1;
     }
 
     pub fn remove(&mut self, id: usize) -> Result<(), &str> {

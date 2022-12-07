@@ -4,6 +4,7 @@ use chrono::NaiveDateTime;
 
 use crate::models::{parser::statement::Statement, semantics::truth_value::TruthValue};
 
+#[derive(Clone)]
 pub struct ExperienceElement {
     pub id: usize,
     pub stmt: Statement,
