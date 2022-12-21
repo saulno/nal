@@ -141,11 +141,15 @@ mod tests {
     #[test]
     fn test_revision() {
         let mut experience_base = ExperienceBase::new();
-        let experience_1 = ExperienceElement::new(Statement::new("d is e").unwrap(), 1);
+        let experience_1 = ExperienceElement::new_with_truth_value(
+            Statement::new("d is e").unwrap(),
+            1,
+            TruthValue::new_from_str("<0.89, 0.9>").unwrap(),
+        );
         let experience_2 = ExperienceElement::new_with_truth_value(
             Statement::new("d is e").unwrap(),
             2,
-            TruthValue::new_from_str("<0.8, 0.89>").unwrap(),
+            TruthValue::new_from_str("<0.80, 0.95>").unwrap(),
         );
         let experience_3 = ExperienceElement::new_with_truth_value(
             Statement::new("a is b").unwrap(),
@@ -163,7 +167,7 @@ mod tests {
         assert_eq!(result.0, Statement::new("d is e").unwrap());
         assert_eq!(
             result.1.to_string(),
-            TruthValue::new_from_str("<9.54, 0.99>")
+            TruthValue::new_from_str("<0.83, 0.97>")
                 .unwrap()
                 .to_string()
         );
@@ -312,12 +316,12 @@ mod tests {
         let experience_2 = ExperienceElement::new_with_truth_value(
             Statement::new("a is c").unwrap(),
             2,
-            TruthValue::new_from_str("<0.8, 0.89>").unwrap(),
+            TruthValue::new_from_str("<0.82, 0.69>").unwrap(),
         );
         let experience_3 = ExperienceElement::new_with_truth_value(
             Statement::new("b is c").unwrap(),
             3,
-            TruthValue::new_from_str("<0.9, 0.99>").unwrap(),
+            TruthValue::new_from_str("<0.8, 0.89>").unwrap(),
         );
 
         experience_base.add(experience_1);
@@ -330,7 +334,7 @@ mod tests {
         assert_eq!(result.0, Statement::new("c is a").unwrap());
         assert_eq!(
             result.1.to_string(),
-            TruthValue::new_from_str("<1.00, 0.28>")
+            TruthValue::new_from_str("<1.00, 0.24>")
                 .unwrap()
                 .to_string()
         );
@@ -339,7 +343,7 @@ mod tests {
         assert_eq!(result.0, Statement::new("c is a").unwrap());
         assert_eq!(
             result.1.to_string(),
-            TruthValue::new_from_str("<1.00, 0.28>")
+            TruthValue::new_from_str("<1.00, 0.24>")
                 .unwrap()
                 .to_string()
         );
@@ -392,7 +396,7 @@ mod tests {
         let experience_1 = ExperienceElement::new_with_truth_value(
             Statement::new("a is b").unwrap(),
             1,
-            TruthValue::new_from_str("<0.5, 0.89>").unwrap(),
+            TruthValue::new_from_str("<0.6, 0.90>").unwrap(),
         );
 
         experience_base.add(experience_1);
@@ -403,7 +407,7 @@ mod tests {
         assert_eq!(result.0, Statement::new("b is a").unwrap());
         assert_eq!(
             result.1.to_string(),
-            TruthValue::new_from_str("<1.00, 0.31>")
+            TruthValue::new_from_str("<1.00, 0.35>")
                 .unwrap()
                 .to_string()
         );
