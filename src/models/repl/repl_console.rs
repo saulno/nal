@@ -351,7 +351,7 @@ mod tests {
             Err(err) => Action::Print(format!("Error: {}", err)),
         };
         assert_eq!(action, Action::Print("Ok.".to_string()));
-        assert_eq!(repl.experience_base.experiences.len(), 4);
+        assert_eq!(repl.experience_base.experiences.len(), 5);
         assert_eq!(
             repl.experience_base.experiences[0].stmt.to_string(),
             "robin -> bird"
