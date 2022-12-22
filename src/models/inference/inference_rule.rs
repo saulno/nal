@@ -6,9 +6,12 @@ use crate::models::{
 
 use super::{
     abduction::abduction, analogy::analogy, choice::choice, comparison::comparison,
-    conversion::conversion, deduction::deduction, exemplification::exemplification,
-    induction::induction, inference_instruction::InferenceInstruction, resemblance::resemblance,
-    revision::revision,
+    conversion::conversion, deduction::deduction, difference_extension::difference_extension,
+    difference_intension::difference_intension, exemplification::exemplification,
+    induction::induction, inference_instruction::InferenceInstruction,
+    intersection_extension::intersection_extension, intersection_intension::intersection_intension,
+    resemblance::resemblance, revision::revision, union_extension::union_extension,
+    union_intension::union_intension,
 };
 
 fn execute_inference(
@@ -61,6 +64,36 @@ fn execute_inference(
         ),
         InferenceInstruction::Resemblance(id_exp_1, id_exp_2) => (
             resemblance(experience_base, id_exp_1, id_exp_2)?,
+            id_exp_1,
+            id_exp_2,
+        ),
+        InferenceInstruction::UnionExtension(id_exp_1, id_exp_2) => (
+            union_extension(experience_base, id_exp_1, id_exp_2)?,
+            id_exp_1,
+            id_exp_2,
+        ),
+        InferenceInstruction::IntersectionExtension(id_exp_1, id_exp_2) => (
+            intersection_extension(experience_base, id_exp_1, id_exp_2)?,
+            id_exp_1,
+            id_exp_2,
+        ),
+        InferenceInstruction::DifferenceExtension(id_exp_1, id_exp_2) => (
+            difference_extension(experience_base, id_exp_1, id_exp_2)?,
+            id_exp_1,
+            id_exp_2,
+        ),
+        InferenceInstruction::UnionIntension(id_exp_1, id_exp_2) => (
+            union_intension(experience_base, id_exp_1, id_exp_2)?,
+            id_exp_1,
+            id_exp_2,
+        ),
+        InferenceInstruction::IntersectionIntension(id_exp_1, id_exp_2) => (
+            intersection_intension(experience_base, id_exp_1, id_exp_2)?,
+            id_exp_1,
+            id_exp_2,
+        ),
+        InferenceInstruction::DifferenceIntension(id_exp_1, id_exp_2) => (
+            difference_intension(experience_base, id_exp_1, id_exp_2)?,
             id_exp_1,
             id_exp_2,
         ),

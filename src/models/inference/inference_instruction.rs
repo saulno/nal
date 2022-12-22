@@ -12,6 +12,13 @@ pub enum InferenceInstruction {
     Comparison(usize, usize),
     Analogy(usize, usize),
     Resemblance(usize, usize),
+    // For set terms
+    UnionExtension(usize, usize),
+    IntersectionExtension(usize, usize),
+    DifferenceExtension(usize, usize),
+    UnionIntension(usize, usize),
+    IntersectionIntension(usize, usize),
+    DifferenceIntension(usize, usize),
 }
 
 impl InferenceInstruction {
@@ -80,6 +87,48 @@ impl InferenceInstruction {
             "resemblance" | "res" => match args[1].parse::<usize>() {
                 Ok(id1) => match args[2].parse::<usize>() {
                     Ok(id2) => Ok(InferenceInstruction::Resemblance(id1, id2)),
+                    Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+                },
+                Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+            },
+            "union_extension" | "ue" => match args[1].parse::<usize>() {
+                Ok(id1) => match args[2].parse::<usize>() {
+                    Ok(id2) => Ok(InferenceInstruction::UnionExtension(id1, id2)),
+                    Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+                },
+                Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+            },
+            "intersection_extension" | "ie" => match args[1].parse::<usize>() {
+                Ok(id1) => match args[2].parse::<usize>() {
+                    Ok(id2) => Ok(InferenceInstruction::IntersectionExtension(id1, id2)),
+                    Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+                },
+                Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+            },
+            "union_intension" | "ui" => match args[1].parse::<usize>() {
+                Ok(id1) => match args[2].parse::<usize>() {
+                    Ok(id2) => Ok(InferenceInstruction::UnionIntension(id1, id2)),
+                    Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+                },
+                Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+            },
+            "intersection_intension" | "ii" => match args[1].parse::<usize>() {
+                Ok(id1) => match args[2].parse::<usize>() {
+                    Ok(id2) => Ok(InferenceInstruction::IntersectionIntension(id1, id2)),
+                    Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+                },
+                Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+            },
+            "difference_extension" | "de" => match args[1].parse::<usize>() {
+                Ok(id1) => match args[2].parse::<usize>() {
+                    Ok(id2) => Ok(InferenceInstruction::DifferenceExtension(id1, id2)),
+                    Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+                },
+                Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+            },
+            "difference_intension" | "di" => match args[1].parse::<usize>() {
+                Ok(id1) => match args[2].parse::<usize>() {
+                    Ok(id2) => Ok(InferenceInstruction::DifferenceIntension(id1, id2)),
                     Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
                 },
                 Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
