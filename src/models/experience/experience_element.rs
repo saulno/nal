@@ -17,7 +17,7 @@ impl fmt::Display for ExperienceElement {
         write!(
             f,
             "{}: {} {} {} {}",
-            self.id, self.stmt.left.word, &self.stmt.copula, self.stmt.right.word, self.truth_value
+            self.id, self.stmt.left, &self.stmt.copula, self.stmt.right, self.truth_value
         )
     }
 }
