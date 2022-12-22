@@ -23,16 +23,22 @@ const HELP_MSG: &str =
     /list   | /l: list all statements in the experience base
     /query  | /q: query the experience base
     /infer  | /i: infer a statement from the experience base
-        revision        | rev | r  <id1> <id2>: infer a statement from the experience base using revision
-        choice          | cho | ch <id1> <id2>: infer a statement from the experience base using choice
-        deduction       | ded | d  <id1> <id2>: infer a statement from the experience base using deduction
-        induction       | ind | i  <id1> <id2>: infer a statement from the experience base using induction
-        exemplification | exe | e  <id1> <id2>: infer a statement from the experience base using exemplification
-        abduction       | abd | a  <id1> <id2>: infer a statement from the experience base using abduction
-        conversion      | cnv | c  <id>: infer a statement from the experience base using conversion
-        comparison      | com      <id1> <id2>: infer a statement from the experience base using comparison
-        analogy         | ana      <id1> <id2>: infer a statement from the experience base using analogy
-        resemblance     | res      <id1> <id2>: infer a statement from the experience base using resemblance
+        revision                | rev | r  <id1> <id2>: infer a statement from the experience base using revision
+        choice                  | cho | ch <id1> <id2>: infer a statement from the experience base using choice
+        deduction               | ded | d  <id1> <id2>: infer a statement from the experience base using deduction
+        induction               | ind | i  <id1> <id2>: infer a statement from the experience base using induction
+        exemplification         | exe | e  <id1> <id2>: infer a statement from the experience base using exemplification
+        abduction               | abd | a  <id1> <id2>: infer a statement from the experience base using abduction
+        conversion              | cnv | c  <id>: infer a statement from the experience base using conversion
+        comparison              | com      <id1> <id2>: infer a statement from the experience base using comparison
+        analogy                 | ana      <id1> <id2>: infer a statement from the experience base using analogy
+        resemblance             | res      <id1> <id2>: infer a statement from the experience base using resemblance
+        union_extension         | ue       <id1> <id2>: infer a statement from the experience base using union_extension
+        union_intension         | ui       <id1> <id2>: infer a statement from the experience base using union_intension
+        intersection_extension  | ie       <id1> <id2>: infer a statement from the experience base using intersection_extension
+        intersection_intension  | ii       <id1> <id2>: infer a statement from the experience base using intersection_intension
+        difference_extension    | de       <id1> <id2>: infer a statement from the experience base using difference_extension
+        difference_intension    | di       <id1> <id2>: infer a statement from the experience base using difference_intension
     /clear  | /c: clear the experience base\n";
 
 #[derive(Debug, PartialEq, Eq)]
