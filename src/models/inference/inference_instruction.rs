@@ -1,12 +1,17 @@
 #[derive(Debug, PartialEq, Eq)]
 pub enum InferenceInstruction {
     Revision(usize, usize),
-    Selection(usize, usize),
+    Choice(usize, usize),
+    // for inheritance
     Deduction(usize, usize),
     Induction(usize, usize),
     Exemplification(usize, usize),
     Abduction(usize, usize),
     Conversion(usize),
+    // for similarity
+    Comparison(usize, usize),
+    Analogy(usize, usize),
+    Resemblance(usize, usize),
 }
 
 impl InferenceInstruction {
@@ -19,9 +24,9 @@ impl InferenceInstruction {
                 },
                 Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
             },
-            "selection" | "sel" | "s" => match args[1].parse::<usize>() {
+            "choice" | "cho" | "ch" => match args[1].parse::<usize>() {
                 Ok(id1) => match args[2].parse::<usize>() {
-                    Ok(id2) => Ok(InferenceInstruction::Selection(id1, id2)),
+                    Ok(id2) => Ok(InferenceInstruction::Choice(id1, id2)),
                     Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
                 },
                 Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
@@ -40,7 +45,7 @@ impl InferenceInstruction {
                 },
                 Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
             },
-            "exemplification" | "exm" | "e" => match args[1].parse::<usize>() {
+            "exemplification" | "exe" | "e" => match args[1].parse::<usize>() {
                 Ok(id1) => match args[2].parse::<usize>() {
                     Ok(id2) => Ok(InferenceInstruction::Exemplification(id1, id2)),
                     Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
@@ -57,6 +62,27 @@ impl InferenceInstruction {
             "conversion" | "cnv" | "c" => match args[1].parse::<usize>() {
                 Ok(id) => Ok(InferenceInstruction::Conversion(id)),
                 Err(_) => Err("Invalid inference instruction: Expected <id>"),
+            },
+            "comparison" | "com" => match args[1].parse::<usize>() {
+                Ok(id1) => match args[2].parse::<usize>() {
+                    Ok(id2) => Ok(InferenceInstruction::Comparison(id1, id2)),
+                    Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+                },
+                Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+            },
+            "analogy" | "ana" => match args[1].parse::<usize>() {
+                Ok(id1) => match args[2].parse::<usize>() {
+                    Ok(id2) => Ok(InferenceInstruction::Analogy(id1, id2)),
+                    Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+                },
+                Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+            },
+            "resemblance" | "res" => match args[1].parse::<usize>() {
+                Ok(id1) => match args[2].parse::<usize>() {
+                    Ok(id2) => Ok(InferenceInstruction::Resemblance(id1, id2)),
+                    Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
+                },
+                Err(_) => Err("Invalid inference instruction: Expected <id1> <id2>"),
             },
             _ => Err("Invalid inference instruction"),
         }
@@ -91,12 +117,12 @@ mod tests {
 
         assert_eq!(
             InferenceInstruction::new(&vec![
-                "selection".to_string(),
+                "choice".to_string(),
                 "1".to_string(),
                 "2".to_string()
             ])
             .unwrap(),
-            InferenceInstruction::Selection(1, 2)
+            InferenceInstruction::Choice(1, 2)
         );
 
         assert_eq!(

@@ -21,6 +21,10 @@ pub fn induction(
         .find(|exp| exp.id == id_exp_2)
         .ok_or("Experience 2 not found.")?;
 
+    if exp1.stmt.copula == Copula::Similarity() || exp2.stmt.copula == Copula::Similarity() {
+        return Err("Induction not possible.");
+    }
+
     if exp1.stmt.left == exp2.stmt.left {
         let positive_evidence = exp1.truth_value.freq
             * exp2.truth_value.freq
@@ -45,5 +49,54 @@ pub fn induction(
         ))
     } else {
         Err("Induction not possible.")
+    }
+}
+
+// tests
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    use crate::models::{
+        experience::experience_element::ExperienceElement, parser::statement::Statement,
+        semantics::truth_value::TruthValue,
+    };
+
+    #[test]
+    fn test_induction() {
+        let mut experience_base = ExperienceBase::new();
+        let experience_1 = ExperienceElement::new_with_truth_value(
+            Statement::new("a is b").unwrap(),
+            1,
+            TruthValue::new_from_str("<0.5, 0.89>").unwrap(),
+        );
+        let experience_2 = ExperienceElement::new_with_truth_value(
+            Statement::new("a is c").unwrap(),
+            2,
+            TruthValue::new_from_str("<0.8, 0.89>").unwrap(),
+        );
+        let experience_3 = ExperienceElement::new_with_truth_value(
+            Statement::new("b is c").unwrap(),
+            3,
+            TruthValue::new_from_str("<0.9, 0.99>").unwrap(),
+        );
+
+        experience_base.add(experience_1);
+        experience_base.add(experience_2);
+        experience_base.add(experience_3);
+
+        assert_eq!(experience_base.experiences.len(), 3);
+
+        let result = induction(&experience_base, 1, 2).unwrap();
+        assert_eq!(result.0, Statement::new("c is b").unwrap());
+        assert_eq!(
+            result.1.to_string(),
+            TruthValue::new_from_str("<0.50, 0.39>")
+                .unwrap()
+                .to_string()
+        );
+
+        let result = induction(&experience_base, 1, 3);
+        assert_eq!(result, Err("Induction not possible."));
     }
 }

@@ -1,9 +1,10 @@
 use crate::models::{
-    experience::experience_base::ExperienceBase, parser::statement::Statement,
+    experience::experience_base::ExperienceBase,
+    parser::{copula::Copula, statement::Statement},
     semantics::truth_value::TruthValue,
 };
 
-pub fn revision(
+pub fn comparison(
     experience_base: &ExperienceBase,
     id_exp_1: usize,
     id_exp_2: usize,
@@ -20,23 +21,30 @@ pub fn revision(
         .find(|exp| exp.id == id_exp_2)
         .ok_or("Experience 2 not found.")?;
 
-    if exp1.stmt.left == exp2.stmt.left && exp1.stmt.right == exp2.stmt.right {
-        let f1 = exp1.truth_value.freq;
-        let f2 = exp2.truth_value.freq;
-        let c1 = exp1.truth_value.conf;
-        let c2 = exp2.truth_value.conf;
+    if exp1.stmt.copula != Copula::Inheritance() || exp2.stmt.copula != Copula::Inheritance() {
+        return Err("Comparison only possible with inheritance copula.");
+    }
 
+    let f1 = exp1.truth_value.freq;
+    let f2 = exp2.truth_value.freq;
+    let c1 = exp1.truth_value.conf;
+    let c2 = exp2.truth_value.conf;
+    let k = 1.0;
+
+    if exp1.stmt.left == exp2.stmt.left {
         Ok((
-            exp1.stmt.clone(),
+            Statement {
+                left: exp2.stmt.right.clone(),
+                copula: Copula::Similarity(),
+                right: exp1.stmt.right.clone(),
+            },
             TruthValue {
-                freq: (f1 * c1 * (1.0 - c2) + f2 * c2 * (1.0 - c1))
-                    / (c1 * (1.0 - c2) + c2 * (1.0 - c1)),
-                conf: (c1 * (1.0 - c2) + c2 * (1.0 - c1))
-                    / (c1 * (1.0 - c2) + c2 * (1.0 - c1) + (1.0 - c1) * (1.0 - c2)),
+                freq: (f1 * f2) / (f1 + f2 - f1 * f2),
+                conf: (c1 * c2 * (f1 + f2 - f1 * f2)) / (c1 * c2 * (f1 + f2 - f1 * f2) + k),
             },
         ))
     } else {
-        Err("Revision not possible.")
+        Err("Comparison not possible.")
     }
 }
 
@@ -50,17 +58,17 @@ mod tests {
     };
 
     #[test]
-    fn test_revision() {
+    fn test_comparison() {
         let mut experience_base = ExperienceBase::new();
         let experience_1 = ExperienceElement::new_with_truth_value(
             Statement::new("d is e").unwrap(),
             1,
-            TruthValue::new_from_str("<0.89, 0.9>").unwrap(),
+            TruthValue::new_from_str("<0.5, 0.89>").unwrap(),
         );
         let experience_2 = ExperienceElement::new_with_truth_value(
-            Statement::new("d is e").unwrap(),
+            Statement::new("d is f").unwrap(),
             2,
-            TruthValue::new_from_str("<0.80, 0.95>").unwrap(),
+            TruthValue::new_from_str("<0.8, 0.89>").unwrap(),
         );
         let experience_3 = ExperienceElement::new_with_truth_value(
             Statement::new("a is b").unwrap(),
@@ -74,16 +82,15 @@ mod tests {
 
         assert_eq!(experience_base.experiences.len(), 3);
 
-        let result = super::revision(&experience_base, 1, 2).unwrap();
-        assert_eq!(result.0, Statement::new("d is e").unwrap());
+        let result = super::comparison(&experience_base, 1, 2);
+        assert!(result.is_ok());
+        let result = result.unwrap();
+        assert_eq!(result.0, Statement::new("f <-> e").unwrap());
         assert_eq!(
             result.1.to_string(),
-            TruthValue::new_from_str("<0.83, 0.97>")
+            TruthValue::new_from_str("<0.44, 0.42>")
                 .unwrap()
                 .to_string()
         );
-
-        let result = super::revision(&experience_base, 1, 3);
-        assert_eq!(result, Err("Revision not possible."));
     }
 }

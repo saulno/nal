@@ -1,9 +1,12 @@
 pub mod abduction;
+pub mod analogy;
+pub mod choice;
+pub mod comparison;
 pub mod conversion;
 pub mod deduction;
 pub mod exemplification;
 pub mod induction;
 pub mod inference_instruction;
 pub mod inference_rule;
+pub mod resemblance;
 pub mod revision;
-pub mod selection;

@@ -10,3 +10,8 @@
 /l
 /i+ abd 2 4
 /l
+
+/a bounce <-> jump
+/a jump similar hop
+/l
+/i res 6 7

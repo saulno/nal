@@ -23,13 +23,16 @@ const HELP_MSG: &str =
     /list   | /l: list all statements in the experience base
     /query  | /q: query the experience base
     /infer  | /i: infer a statement from the experience base
-        revision        | rev | r <id1> <id2>: infer a statement from the experience base using revision
-        selection       | sel | s <id1> <id2>: infer a statement from the experience base using selection
-        deduction       | ded | d <id1> <id2>: infer a statement from the experience base using deduction
-        induction       | ind | i <id1> <id2>: infer a statement from the experience base using induction
-        exemplification | exm | e <id1> <id2>: infer a statement from the experience base using exemplification
-        abduction       | abd | a <id1> <id2>: infer a statement from the experience base using abduction
-        conversion      | cnv | c <id>: infer a statement from the experience base using conversion
+        revision        | rev | r  <id1> <id2>: infer a statement from the experience base using revision
+        choice          | cho | ch <id1> <id2>: infer a statement from the experience base using choice
+        deduction       | ded | d  <id1> <id2>: infer a statement from the experience base using deduction
+        induction       | ind | i  <id1> <id2>: infer a statement from the experience base using induction
+        exemplification | exe | e  <id1> <id2>: infer a statement from the experience base using exemplification
+        abduction       | abd | a  <id1> <id2>: infer a statement from the experience base using abduction
+        conversion      | cnv | c  <id>: infer a statement from the experience base using conversion
+        comparison      | com      <id1> <id2>: infer a statement from the experience base using comparison
+        analogy         | ana      <id1> <id2>: infer a statement from the experience base using analogy
+        resemblance     | res      <id1> <id2>: infer a statement from the experience base using resemblance
     /clear  | /c: clear the experience base\n";
 
 #[derive(Debug, PartialEq, Eq)]
@@ -41,7 +44,6 @@ pub enum Action {
 
 pub struct ReplConsole {
     counter: usize,
-    experience_current_id: usize,
     experience_base: ExperienceBase,
 }
 
@@ -55,7 +57,6 @@ impl ReplConsole {
     pub fn new() -> Self {
         Self {
             counter: 0,
-            experience_current_id: 1,
             experience_base: ExperienceBase::new(),
         }
     }
@@ -108,18 +109,14 @@ impl ReplConsole {
             Ok(ReplInstruction::Exit()) => Ok(Action::Exit()),
             Ok(ReplInstruction::Assert(s)) => {
                 let stmt: Statement = Statement::new(&s[..3].join(" "))?;
+                let next_id = self.experience_base.get_next_id();
                 let experience: ExperienceElement =
                     if TruthValue::new_from_str(&s[3..].join(" ")).is_ok() {
                         let truth_value = TruthValue::new_from_str(&s[3..].join(" ")).unwrap();
-                        ExperienceElement::new_with_truth_value(
-                            stmt,
-                            self.experience_current_id,
-                            truth_value,
-                        )
+                        ExperienceElement::new_with_truth_value(stmt, next_id, truth_value)
                     } else {
-                        ExperienceElement::new(stmt, self.experience_current_id)
+                        ExperienceElement::new(stmt, next_id)
                     };
-                self.experience_current_id += 1;
 
                 self.experience_base.add(experience);
                 Ok(Action::Print("Ok.".to_string()))
@@ -351,7 +348,7 @@ mod tests {
             Err(err) => Action::Print(format!("Error: {}", err)),
         };
         assert_eq!(action, Action::Print("Ok.".to_string()));
-        assert_eq!(repl.experience_base.experiences.len(), 5);
+        assert_eq!(repl.experience_base.experiences.len(), 7);
         assert_eq!(
             repl.experience_base.experiences[0].stmt.to_string(),
             "robin -> bird"
